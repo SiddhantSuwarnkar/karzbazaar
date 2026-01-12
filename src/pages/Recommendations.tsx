@@ -173,7 +173,7 @@ const Recommendations: React.FC = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Monthly EMI:</span><b style={{color:'#1A202C'}}>{loan.emi}</b></div>
                   </div>
 
-                  {/* THE EXPANDING SECTION - KEPT INTACT */}
+                  {/* THE EXPANDING SECTION */}
                   <div style={{ maxHeight: isHovered ? '400px' : '0', overflow: 'hidden', transition: 'all 0.5s ease', marginTop: isHovered ? '15px' : '0', opacity: isHovered ? 1 : 0, borderTop: isHovered ? '1px solid #EDF2F7' : 'none', paddingTop: isHovered ? '15px' : '0' }}>
                     <div style={{ fontSize: '13px', color: '#718096', marginBottom: '10px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
@@ -191,18 +191,31 @@ const Recommendations: React.FC = () => {
                   </div>
 
                   <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #EDF2F7', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 600 }}>
-                      Risk Score: <span style={{color: loan.isRecommended ? '#38A169' : '#E53E3E'}}>{loan.rejectionProb}</span> 
+                    
+                    {/* UPDATED: Increased Font Size & Weight for Visibility */}
+                    <span style={{ fontSize: '15px', fontWeight: 800, color: '#4A5568' }}>
+                      Risk Score: 
+                      <span style={{
+                        color: loan.isRecommended ? '#38A169' : '#E53E3E',
+                        marginLeft: '6px',
+                        fontSize: '16px'
+                      }}>
+                        {loan.rejectionProb}
+                      </span> 
                       <span 
                         onMouseEnter={() => setHoveredRiskId(loan.id)} 
                         onMouseLeave={() => setHoveredRiskId(null)} 
+                        onClick={(e) => {
+                           e.stopPropagation();
+                           if(isMobile) setHoveredRiskId(hoveredRiskId === loan.id ? null : loan.id);
+                        }}
                         style={{ cursor: 'help', marginLeft: '6px', color: '#EF4444', fontWeight: 'bold' }}
                       >?</span>
                     </span>
                     
                     <span 
                       onClick={(e) => { e.stopPropagation(); navigate('/info', { state: { loan } }) }} 
-                      style={{ fontSize: '13px', color: '#3182CE', fontWeight: 700, cursor: 'pointer' }}
+                      style={{ fontSize: '14px', color: '#3182CE', fontWeight: 700, cursor: 'pointer' }}
                     >
                       Details
                     </span>
