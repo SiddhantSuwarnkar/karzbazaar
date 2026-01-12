@@ -1,22 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { authUsers } from '../mockData'; 
 
-// 1. Defined interface for the component props
 interface LoginProps {
   onLogin: () => void;
 }
 
-// 2. Applied React.FC with LoginProps
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(''); 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
+
+  // Handle responsiveness
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,27 +31,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // AUTHENTICATION LOGIC
     const user = authUsers.find(
       (u) => u.username === formData.username && u.password === formData.password
     );
 
     if (user) {
-      // Create user session in LocalStorage
       const userSession = {
         fullName: user.fullName,
         email: user.email,
         isLoggedIn: true,
         profileImage: (user as any).profileImage || null 
       };
-
       localStorage.setItem('user', JSON.stringify(userSession));
-      
-      // 3. Trigger the global auth state change in App.tsx
       onLogin(); 
-      
-      // 4. Redirect to Dashboard
       navigate('/'); 
     } else {
       setError('Invalid username or password');
@@ -54,22 +52,25 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div style={{ 
-      height: '100vh', 
+      minHeight: '100vh', 
       width: '100vw', 
       backgroundColor: '#F4F7FA', 
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center',
-      fontFamily: "'Inter', sans-serif"
+      fontFamily: "'Inter', sans-serif",
+      padding: isMobile ? '20px' : '0' // Prevents card from touching screen edges on mobile
     }}>
       <div style={{
-        width: '400px',
+        width: '100%',
+        maxWidth: '400px', // Original width for large screens
         backgroundColor: 'white',
-        padding: '40px',
+        padding: isMobile ? '30px 20px' : '40px', // Adjusted padding for mobile
         borderRadius: '28px',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         flexDirection: 'column',
+        boxSizing: 'border-box'
       }}>
         {/* LOGO & HEADER */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -83,7 +84,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           }}>
             <Lock size={28} />
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#1A365D', margin: '0' }}>KarzBazaar</h1>
+          <h1 style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 800, color: '#1A365D', margin: '0' }}>KarzBazaar</h1>
           <p style={{ color: '#718096', fontSize: '14px', marginTop: '8px' }}>Access your personalized loan offers</p>
         </div>
 
@@ -129,7 +130,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   fontSize: '14px',
                   outline: 'none',
                   boxSizing: 'border-box',
-                  transition: 'border-color 0.2s'
+                  transition: 'border-color 0.2s',
+                  backgroundColor: 'white' // Prevents browser autofill from changing colors
                 }}
               />
             </div>
@@ -159,7 +161,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   border: error ? '1px solid #FC8181' : '1px solid #E2E8F0',
                   fontSize: '14px',
                   outline: 'none',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  backgroundColor: 'white'
                 }}
               />
               <button

@@ -8,6 +8,13 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const EMICalculator: React.FC = () => {
     const navigate = useNavigate();
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // State for inputs
     const [loanAmount, setLoanAmount] = useState<number>(1000000);
@@ -55,6 +62,7 @@ const EMICalculator: React.FC = () => {
             legend: { display: false },
         },
         cutout: '78%',
+        maintainAspectRatio: true,
     };
 
     return (
@@ -73,17 +81,25 @@ const EMICalculator: React.FC = () => {
                 backAction={() => navigate(-1)} 
             />
 
-            <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <main style={{ 
+                flex: 1, 
+                display: 'flex', 
+                alignItems: isMobile ? 'flex-start' : 'center', 
+                justifyContent: 'center', 
+                padding: isMobile ? '10px' : '20px',
+                overflowY: 'auto' // Crucial for mobile scrolling
+            }}>
                 <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: '1.2fr 0.8fr', 
-                    gap: '40px', 
+                    gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr', 
+                    gap: isMobile ? '30px' : '40px', 
                     backgroundColor: 'white', 
-                    padding: '48px', 
+                    padding: isMobile ? '24px' : '48px', 
                     borderRadius: '28px',
                     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)',
                     width: '100%',
-                    maxWidth: '1100px'
+                    maxWidth: '1100px',
+                    margin: isMobile ? '20px 0' : '0'
                 }}>
                     
                     {/* Left: Sliders */}
@@ -91,7 +107,7 @@ const EMICalculator: React.FC = () => {
                         <div style={{ marginBottom: '36px' }}>
                             <div style={inputHeaderStyle}>
                                 <label style={labelStyle}>Loan Amount</label>
-                                <div style={{...valueBoxStyle, color: secondaryColor, backgroundColor: '#F1F5F9'}}>₹ {loanAmount.toLocaleString('en-IN')}</div>
+                                <div style={{...valueBoxStyle, color: secondaryColor, backgroundColor: '#F1F5F9', fontSize: isMobile ? '14px' : '16px'}}>₹ {loanAmount.toLocaleString('en-IN')}</div>
                             </div>
                             <input 
                                 type="range" min="100000" max="10000000" step="50000"
@@ -104,7 +120,7 @@ const EMICalculator: React.FC = () => {
                         <div style={{ marginBottom: '36px' }}>
                             <div style={inputHeaderStyle}>
                                 <label style={labelStyle}>Rate of Interest (p.a)</label>
-                                <div style={{...valueBoxStyle, color: secondaryColor, backgroundColor: '#F1F5F9'}}>{interestRate} %</div>
+                                <div style={{...valueBoxStyle, color: secondaryColor, backgroundColor: '#F1F5F9', fontSize: isMobile ? '14px' : '16px'}}>{interestRate} %</div>
                             </div>
                             <input 
                                 type="range" min="1" max="20" step="0.1"
@@ -117,7 +133,7 @@ const EMICalculator: React.FC = () => {
                         <div style={{ marginBottom: '36px' }}>
                             <div style={inputHeaderStyle}>
                                 <label style={labelStyle}>Loan Tenure (Years)</label>
-                                <div style={{...valueBoxStyle, color: secondaryColor, backgroundColor: '#F1F5F9'}}>{tenure} Yr</div>
+                                <div style={{...valueBoxStyle, color: secondaryColor, backgroundColor: '#F1F5F9', fontSize: isMobile ? '14px' : '16px'}}>{tenure} Yr</div>
                             </div>
                             <input 
                                 type="range" min="1" max="30" step="1"
@@ -127,19 +143,28 @@ const EMICalculator: React.FC = () => {
                             />
                         </div>
 
-                        <div style={{ marginTop: '48px', padding: '24px', backgroundColor: secondaryColor, borderRadius: '20px', textAlign: 'center' }}>
+                        <div style={{ marginTop: isMobile ? '24px' : '48px', padding: '24px', backgroundColor: secondaryColor, borderRadius: '20px', textAlign: 'center' }}>
                             <div style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1px' }}>Monthly EMI</div>
-                            <div style={{ fontSize: '32px', fontWeight: 800, color: primaryColor, marginTop: '4px' }}>₹ {monthlyEMI.toLocaleString('en-IN')}</div>
+                            <div style={{ fontSize: isMobile ? '28px' : '32px', fontWeight: 800, color: primaryColor, marginTop: '4px' }}>₹ {monthlyEMI.toLocaleString('en-IN')}</div>
                         </div>
                     </div>
 
                     {/* Right: Chart and Summary */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid #F1F5F9', paddingLeft: '40px' }}>
-                        <div style={{ width: '260px', height: '260px', position: 'relative' }}>
+                    <div style={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        borderLeft: isMobile ? 'none' : '1px solid #F1F5F9', 
+                        borderTop: isMobile ? '1px solid #F1F5F9' : 'none',
+                        paddingLeft: isMobile ? '0' : '40px',
+                        paddingTop: isMobile ? '40px' : '0'
+                    }}>
+                        <div style={{ width: isMobile ? '220px' : '260px', height: isMobile ? '220px' : '260px', position: 'relative' }}>
                             <Doughnut data={chartData} options={chartOptions} />
-                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                                <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 600, textTransform: 'uppercase' }}>Total Payable</div>
-                                <div style={{ fontSize: '18px', fontWeight: 800, color: secondaryColor }}>₹ {totalAmount.toLocaleString('en-IN')}</div>
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%' }}>
+                                <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600, textTransform: 'uppercase' }}>Total Payable</div>
+                                <div style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 800, color: secondaryColor }}>₹ {totalAmount.toLocaleString('en-IN')}</div>
                             </div>
                         </div>
 
@@ -187,7 +212,6 @@ const valueBoxStyle: React.CSSProperties = {
     padding: '8px 16px',
     borderRadius: '10px',
     fontWeight: 800,
-    fontSize: '16px',
     border: '1px solid #E2E8F0'
 };
 

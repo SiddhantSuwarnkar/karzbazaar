@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-    Landmark, ShieldCheck, Zap, Activity 
+    Landmark, ShieldCheck, Zap, Activity, ExternalLink 
 } from 'lucide-react';
 import { type LoanProduct } from '../mockData';
 import Navbar from '../components/Navbar';
@@ -9,6 +9,13 @@ import Navbar from '../components/Navbar';
 const LoanDetails: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Retrieve the specific loan object passed from the Compare/Recommendation page
   const selectedLoan: LoanProduct = location.state?.loan;
@@ -40,34 +47,56 @@ const LoanDetails: React.FC = () => {
         backAction={() => navigate(-1)} 
       />
 
-      {/* TWO-COLUMN LAYOUT */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      {/* TWO-COLUMN LAYOUT (Desktop) / STACKED LAYOUT (Mobile) */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'row', overflow: 'hidden' }}>
         
-        {/* LEFT SIDEBAR - Bank Brand Identity */}
+        {/* LEFT SIDEBAR / TOP HEADER - Bank Brand Identity */}
         <div style={{ 
-          width: '400px', backgroundColor: '#1E293B', color: 'white', display: 'flex', flexDirection: 'column', 
-          alignItems: 'center', justifyContent: 'center', padding: '60px', textAlign: 'center', flexShrink: 0, boxShadow: '4px 0 15px rgba(0,0,0,0.1)' 
+          width: isMobile ? '100%' : '400px', 
+          backgroundColor: '#1E293B', 
+          color: 'white', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          padding: isMobile ? '40px 20px' : '60px', 
+          textAlign: 'center', 
+          flexShrink: 0, 
+          boxShadow: isMobile ? '0 4px 15px rgba(0,0,0,0.1)' : '4px 0 15px rgba(0,0,0,0.1)',
+          zIndex: 5
         }}>
-          <div style={{ backgroundColor: '#334155', padding: '30px', borderRadius: '32px', marginBottom: '24px', border: '1px solid #475569' }}>
-            <Landmark size={64} color="#38BDF8" />
+          <div style={{ backgroundColor: '#334155', padding: isMobile ? '20px' : '30px', borderRadius: '32px', marginBottom: '24px', border: '1px solid #475569' }}>
+            <Landmark size={isMobile ? 48 : 64} color="#38BDF8" />
           </div>
-          <h2 style={{ fontSize: '32px', color: '#F8FAFC', fontWeight: 800, margin: '0 0 12px 0' }}>{selectedLoan.bank}</h2>
+          <h2 style={{ fontSize: isMobile ? '28px' : '32px', color: '#F8FAFC', fontWeight: 800, margin: '0 0 12px 0' }}>{selectedLoan.bank}</h2>
           <div style={{ height: '3px', width: '60px', backgroundColor: '#38BDF8', marginBottom: '20px', borderRadius: '2px' }}></div>
-          <p style={{ fontSize: '16px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.6, maxWidth: '280px' }}>
+          <p style={{ fontSize: '16px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.6, maxWidth: '280px', marginBottom: '30px' }}>
             Personalized breakdown for your requested loan of {selectedLoan.total}.
           </p>
+
+          {/* ADDED: Loan Product Info in Sidebar */}
+          <div style={{ width: '100%', maxWidth: '280px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
+                <span style={{ fontSize: '13px', color: '#94A3B8' }}>Interest Rate</span>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#38BDF8' }}>{selectedLoan.rate}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '13px', color: '#94A3B8' }}>Tenure</span>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: 'white' }}>{selectedLoan.tenure}</span>
+            </div>
+          </div>
         </div>
 
         {/* SCROLLABLE MAIN SECTION - Details */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '60px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px 15px' : '60px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           
           <div style={{ 
-            width: '100%', maxWidth: '900px', backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '50px', 
-            boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '45px', marginBottom: '40px' 
+            width: '100%', maxWidth: '900px', backgroundColor: '#FFFFFF', borderRadius: '24px', padding: isMobile ? '25px' : '50px', 
+            boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: isMobile ? '30px' : '45px', marginBottom: '40px' 
           }}>
             
             {/* TOP SECTION: COST & ELIGIBILITY */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2px 1fr', gap: '50px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 2px 1fr', gap: isMobile ? '30px' : '50px' }}>
               <div>
                 <h3 style={{ fontSize: '14px', color: '#0F172A', marginBottom: '24px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Activity size={18} color="#0284C7" /> Core Cost
@@ -78,7 +107,7 @@ const LoanDetails: React.FC = () => {
                 <DetailRow label="Processing Fee" value={selectedLoan.processingFee} />
               </div>
 
-              <div style={{ backgroundColor: '#F1F5F9' }}></div>
+              {!isMobile && <div style={{ backgroundColor: '#F1F5F9' }}></div>}
 
               <div>
                 <h3 style={{ fontSize: '14px', color: '#0F172A', marginBottom: '24px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -92,7 +121,7 @@ const LoanDetails: React.FC = () => {
             </div>
 
             {/* MIDDLE SECTION: POLICY BLOCKS */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '20px' }}>
               <PolicySection title="Flexibility" icon={<Zap size={16} color="#0284C7"/>}>
                 <SmallRow label="Prepayment" value={selectedLoan.prepayment} />
                 <SmallRow label="Foreclosure" value="Available" />
@@ -113,22 +142,34 @@ const LoanDetails: React.FC = () => {
             </div>
 
             {/* FOOTER: REASONING & CTA */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '30px', backgroundColor: '#F8FAFC', borderRadius: '20px', border: '1px solid #E2E8F0' }}>
-              <div style={{ maxWidth: '65%' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: isMobile ? 'column' : 'row',
+              justifyContent: 'space-between', 
+              alignItems: isMobile ? 'flex-start' : 'center', 
+              padding: isMobile ? '20px' : '30px', 
+              backgroundColor: '#F8FAFC', 
+              borderRadius: '20px', 
+              border: '1px solid #E2E8F0',
+              gap: isMobile ? '20px' : '0'
+            }}>
+              <div style={{ maxWidth: isMobile ? '100%' : '65%' }}>
                 <h4 style={{ color: '#0F172A', margin: '0 0 10px 0', fontSize: '15px', fontWeight: 800 }}>Expert Analysis</h4>
                 <p style={{ margin: 0, fontSize: '14px', color: '#64748B', lineHeight: 1.6 }}>
                   {selectedLoan.riskReason} 
                 </p>
               </div>
 
+              {/* UPDATED BUTTON */}
               <button style={{ 
-                backgroundColor: '#0284C7', color: 'white', border: 'none', padding: '16px 45px', borderRadius: '12px', 
-                fontWeight: 700, fontSize: '16px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)' 
+                backgroundColor: '#0284C7', color: 'white', border: 'none', padding: isMobile ? '16px 0' : '16px 30px', borderRadius: '12px', 
+                fontWeight: 700, fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
+                width: isMobile ? '100%' : 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
               }}
               onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
-                Apply Now
+                Visit Official Bank Website <ExternalLink size={16} />
               </button>
             </div>
           </div>
@@ -138,7 +179,7 @@ const LoanDetails: React.FC = () => {
   );
 };
 
-/* --- MINI HELPER COMPONENTS --- */
+/* --- MINI HELPER COMPONENTS (STYLING PRESERVED) --- */
 
 const DetailRow = ({ label, value, color = "#334155" }: { label: string, value: string, color?: string }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '18px', paddingBottom: '8px', borderBottom: '1px solid #F8FAFC' }}>

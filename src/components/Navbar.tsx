@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, LogOut, UserCircle, ChevronDown, User } from 'lucide-react';
 
@@ -10,10 +10,17 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ title, backAction }) => {
     const navigate = useNavigate();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-    // Get current user data from localStorage to match Home page
+    // Get current user data from localStorage
     const savedUser = localStorage.getItem('user');
     const userData = savedUser ? JSON.parse(savedUser) : { fullName: "Guest User" };
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleBack = () => {
         if (backAction) {
@@ -25,33 +32,45 @@ const Navbar: React.FC<NavbarProps> = ({ title, backAction }) => {
 
     const handleLogout = () => {
         localStorage.removeItem('user');
-        // Refresh to reset the global auth state in App.tsx
         window.location.href = '/'; 
     };
 
     return (
         <div style={{ 
-            padding: '10px 40px', 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+            // GRID LAYOUT: 1fr (Left) - auto (Center) - 1fr (Right)
+            // This forces the center element to be exactly in the middle of the screen
+            display: 'grid',
+            gridTemplateColumns: '1fr auto 1fr', 
             alignItems: 'center', 
+            
+            padding: isMobile ? '15px 20px' : '10px 40px', 
             backgroundColor: '#0F172A', 
             color: 'white', 
             flexShrink: 0,
             position: 'relative',
             zIndex: 1100,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            height: '60px' 
         }}>
-            <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={handleBack}>
+            
+            {/* LEFT COLUMN: Back Button */}
+            <div 
+                style={{ justifySelf: 'start', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }} 
+                onClick={handleBack}
+            >
                 <ArrowLeft size={18} color="#38BDF8" />
-                <span style={{ fontSize: '14px', fontWeight: 500 }}>Back</span>
+                {!isMobile && <span style={{ fontSize: '14px', fontWeight: 500 }}>Back</span>}
             </div>
 
-            <h1 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>
-                {title}
-            </h1>
+            {/* CENTER COLUMN: Title */}
+            <div style={{ justifySelf: 'center', textAlign: 'center', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+                <h1 style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 700, margin: 0 }}>
+                    {title}
+                </h1>
+            </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
+            {/* RIGHT COLUMN: Profile Menu */}
+            <div style={{ justifySelf: 'end', position: 'relative' }}>
                 <div 
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
                     style={{ 
@@ -60,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({ title, backAction }) => {
                         gap: '10px', 
                         cursor: 'pointer', 
                         backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-                        padding: '6px 16px', 
+                        padding: '6px 12px', 
                         borderRadius: '50px',
                         transition: 'all 0.2s ease'
                     }}
@@ -81,9 +100,11 @@ const Navbar: React.FC<NavbarProps> = ({ title, backAction }) => {
                         {userData?.fullName ? userData.fullName.charAt(0).toUpperCase() : <User size={16} />}
                     </div>
 
-                    <span style={{ fontWeight: 700, color: 'white', fontSize: '15px' }}>
-                        {userData?.fullName}
-                    </span>
+                    {!isMobile && (
+                        <span style={{ fontWeight: 700, color: 'white', fontSize: '15px' }}>
+                            {userData?.fullName}
+                        </span>
+                    )}
                     
                     <ChevronDown size={18} color="white" style={{ transform: showProfileMenu ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
                 </div>

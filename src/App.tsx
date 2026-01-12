@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import EMICalculator from './pages/EMICalculator';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Chatbot from './components/Chatbot'; // adjust path as needed
 
 /**
  * ProtectedRoute Component
@@ -25,8 +26,12 @@ const ProtectedRoute = ({ isAuth, children }: { isAuth: boolean; children: React
 };
 
 function App() {
-  // Global auth state
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  // FIX: Initialize state by checking localStorage immediately (Lazy Initialization)
+  // This ensures the state is correct BEFORE the first render
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? true : false;
+  });
 
   return (
     <Router>
@@ -101,6 +106,7 @@ function App() {
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Chatbot />
       </div>
     </Router>
   );

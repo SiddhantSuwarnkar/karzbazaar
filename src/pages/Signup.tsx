@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff, Mail, UserPlus, ShieldCheck, ArrowRight } from 'lucide-react';
 
@@ -6,12 +6,20 @@ const SignUp: React.FC = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,12 +38,13 @@ const SignUp: React.FC = () => {
   // Reusable Styles
   const inputStyle: React.CSSProperties = {
     width: '100%',
-    padding: '10px 16px 10px 42px', // Slightly tighter padding to ensure no overflow
+    padding: '10px 16px 10px 42px',
     borderRadius: '12px',
     border: '1px solid #E2E8F0',
     fontSize: '14px',
     outline: 'none',
     boxSizing: 'border-box',
+    backgroundColor: 'white', // Explicit white for cross-device consistency
   };
 
   const labelStyle: React.CSSProperties = {
@@ -69,23 +78,27 @@ const SignUp: React.FC = () => {
 
   return (
     <div style={{ 
-      height: '100vh', 
+      minHeight: '100vh', 
       width: '100vw', 
       backgroundColor: '#F4F7FA', 
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center',
       fontFamily: "'Inter', sans-serif",
-      overflow: 'hidden' // Strictly non-scrollable
+      overflowX: 'hidden',
+      overflowY: 'auto', // Allows scrolling only if screen height is very small
+      padding: isMobile ? '20px 0' : '0'
     }}>
       <div style={{
-        width: '420px',
+        width: '90%', // Mobile friendly width
+        maxWidth: '420px', // Original laptop width
         backgroundColor: 'white',
-        padding: '32px 40px',
+        padding: isMobile ? '24px 20px' : '32px 40px',
         borderRadius: '28px',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         flexDirection: 'column',
+        boxSizing: 'border-box'
       }}>
         {/* LOGO & HEADER */}
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
@@ -99,7 +112,7 @@ const SignUp: React.FC = () => {
           }}>
             <UserPlus size={24} />
           </div>
-          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#1A365D', margin: '0' }}>Join KarzBazaar</h1>
+          <h1 style={{ fontSize: isMobile ? '22px' : '24px', fontWeight: 800, color: '#1A365D', margin: '0' }}>Join KarzBazaar</h1>
           <p style={{ color: '#718096', fontSize: '13px', marginTop: '6px' }}>Start your journey toward the best loan offers</p>
         </div>
 
